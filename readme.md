@@ -76,6 +76,8 @@ var myWave = $('#myID').wavify({
 | speed        | Animation speed                                                             | 0.15                    |
 | height       | Height of the wave from crest to trough                                     | 200                     |
 | amplitude    | Vertical distance wave travels                                              | 100                     |
+| line         | Draw wave as a line instead of filled                                       | false                   |
+| strokeWidth  | Stroke width if using line                                                  | 1px                     |
 
 ## Available Functions
 

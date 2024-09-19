@@ -22,7 +22,11 @@ function wavify(wave_element, options) {
       // Total number of articulation in wave
       bones: 3,
       // Color
-      color: "rgba(255,255,255, 0.20)"
+      color: "rgba(255,255,255, 0.20)",
+      // Draw as line
+      line: false,
+      // Stroke width if using line
+      strokeWidth: "1px"
     },
     options
   );
@@ -108,8 +112,10 @@ function wavify(wave_element, options) {
       inverted = -inverted;
     }
 
-    SVGString += " L " + width + " " + height;
-    SVGString += " L 0 " + height + " Z";
+    if (!settings.line) {
+      SVGString += " L " + width + " " + height;
+      SVGString += " L 0 " + height + " Z";
+    }
     return SVGString;
   }
 
@@ -170,9 +176,22 @@ function wavify(wave_element, options) {
     play();
   }, 250);
 
+  function getAttr(options) {
+    options = options || settings;
+    if (options.line) {
+      return {
+        stroke: options.color,
+        "fill-opacity": 0,
+        "stroke-width": options.strokeWidth
+      };
+    } else {
+      return { fill: options.color, "fill-opacity": 1 };
+    }
+  }
+
   function boot() {
     if (!animationInstance) {
-      tweenMaxInstance = TweenMax.set(wave, { attr: { fill: settings.color } });
+      tweenMaxInstance = TweenMax.set(wave, { attr: getAttr() });
       play();
       window.addEventListener("resize", redraw);
     }
@@ -183,7 +202,7 @@ function wavify(wave_element, options) {
     if (typeof options !== undefined) {
       rebuilSettings(options);
     }
-    tweenMaxInstance = TweenMax.set(wave, { attr: { fill: settings.color } });
+    tweenMaxInstance = TweenMax.set(wave, { attr: getAttr(options) });
     play();
     window.addEventListener("resize", redraw);
   }
@@ -208,8 +227,15 @@ function wavify(wave_element, options) {
     if (typeof options.color === undefined) {
       options.color = settings.color;
     }
+    // Preserve attrs from the original settings so you don't have to pass them
+    // in again when updating the color
+    //
+    Object.assign(options, {
+      line: settings.line,
+      strokeWidth: settings.strokeWidth
+    });
     tweenMaxInstance = TweenMax.to(wave, parseInt(options.timing), {
-      attr: { fill: options.color },
+      attr: getAttr(options),
       onComplete: function() {
         if (
           typeof options.onComplete !== undefined &&
@@ -233,7 +259,8 @@ function wavify(wave_element, options) {
         clearProps: "all",
         attr: {
           d: "M0,0",
-          fill: ""
+          fill: "",
+          stroke: ""
         }
       });
       window.removeEventListener("resize", redraw);
